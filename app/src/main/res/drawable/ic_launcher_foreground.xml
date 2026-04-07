@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Sword -->
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M54,20 L58,52 L54,56 L50,52 Z" />
+    <path
+        android:fillColor="#FCD34D"
+        android:pathData="M44,50 L64,50 L64,56 L44,56 Z" />
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M51,56 L54,88 L57,56 Z" />
+    <!-- Gem on pommel -->
+    <path
+        android:fillColor="#A78BFA"
+        android:pathData="M51,84 L54,90 L57,84 L54,80 Z" />
+    <!-- Stars -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M34,30 L35,34 L39,35 L35,36 L34,40 L33,36 L29,35 L33,34 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M74,65 L75,68 L78,69 L75,70 L74,73 L73,70 L70,69 L73,68 Z" />
+</vector>
