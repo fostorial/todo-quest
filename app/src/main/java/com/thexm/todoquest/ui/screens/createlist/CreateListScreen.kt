@@ -34,6 +34,8 @@ fun CreateListScreen(
     viewModel: CreateListViewModel = viewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val unlockedClassEmojis by viewModel.unlockedClassEmojis.collectAsState()
+    val availableEmojis = remember(unlockedClassEmojis) { PRESET_EMOJIS + unlockedClassEmojis }
 
     Scaffold(
         topBar = {
@@ -123,7 +125,7 @@ fun CreateListScreen(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                items(PRESET_EMOJIS) { emoji ->
+                items(availableEmojis) { emoji ->
                     Box(
                         modifier = Modifier
                             .aspectRatio(1f)

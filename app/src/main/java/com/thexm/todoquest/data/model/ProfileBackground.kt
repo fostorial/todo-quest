@@ -7,6 +7,9 @@ sealed class UnlockRequirement {
     abstract fun isMet(profile: PlayerProfile): Boolean
     abstract fun description(): String
 
+    /** Two-param variant — only overridden by [ClassUnlocked]; all others delegate to the single-param version. */
+    open fun isMet(profile: PlayerProfile, xpPerClass: Map<String, Long>): Boolean = isMet(profile)
+
     object AlwaysUnlocked : UnlockRequirement() {
         override fun isMet(profile: PlayerProfile) = true
         override fun description() = "Always unlocked"
@@ -51,6 +54,14 @@ sealed class UnlockRequirement {
     data class Any(val requirements: List<UnlockRequirement>) : UnlockRequirement() {
         override fun isMet(profile: PlayerProfile) = requirements.any { it.isMet(profile) }
         override fun description() = requirements.joinToString(" or ") { it.description() }
+    }
+
+    /** Unlocked when the given hero class is unlocked (requires xpPerClass to evaluate). */
+    data class ClassUnlocked(val classId: String) : UnlockRequirement() {
+        override fun isMet(profile: PlayerProfile): Boolean = false  // always use the two-param version
+        override fun isMet(profile: PlayerProfile, xpPerClass: Map<String, Long>): Boolean =
+            HeroClassRegistry.isUnlocked(classId, xpPerClass)
+        override fun description(): String = "Unlock the ${HeroClassRegistry.getById(classId).displayName} class"
     }
 }
 

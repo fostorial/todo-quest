@@ -3,11 +3,11 @@ package com.thexm.todoquest.util
 object LevelCalculator {
 
     // XP required to REACH a given level (cumulative from level 1)
-    // Level 1 = 0, Level 2 = 100, Level 3 = 250, Level 4 = 450 ...
-    // Formula: xpForLevel(n) = 50 * n * (n - 1) for n >= 1
+    // Level 1 = 0, Level 2 = 25, Level 3 = 75, Level 4 = 150 ...
+    // Formula: xpForLevel(n) = 25 * n * (n - 1) / 2 for n >= 1
     fun xpRequiredForLevel(level: Int): Long {
         if (level <= 1) return 0L
-        return 50L * level * (level - 1)
+        return 25L * level * (level - 1) / 2
     }
 
     fun levelForXP(totalXP: Long): Int {

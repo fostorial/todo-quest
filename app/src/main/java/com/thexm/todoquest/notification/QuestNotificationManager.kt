@@ -163,8 +163,73 @@ object QuestNotificationManager {
         }
     }
 
+    fun showQuestDueNowNotification(
+        context: Context,
+        quest: Quest,
+        listName: String,
+        listEmoji: String
+    ) {
+        val dueDateMillis = quest.dueDateMillis ?: return
+        val notificationId = (quest.id % 100_000L + 20_001L).toInt()
+
+        val openAppIntent = PendingIntent.getActivity(
+            context, notificationId,
+            Intent(context, MainActivity::class.java),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val completeIntent = Intent(context, NotificationReceiver::class.java).apply {
+            action = "com.thexm.todoquest.ACTION_COMPLETE_QUEST"
+            putExtra("quest_id", quest.id)
+        }
+        val completePendingIntent = PendingIntent.getBroadcast(
+            context, notificationId,
+            completeIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val dueDateFormatted = SimpleDateFormat("MMM d 'at' h:mm a", Locale.getDefault())
+            .format(Date(dueDateMillis))
+
+        val expandedText = buildString {
+            appendLine(quest.title)
+            if (quest.description.isNotBlank()) appendLine(quest.description)
+            appendLine("⏰ Due: $dueDateFormatted")
+            appendLine("$listEmoji Board: $listName")
+            append("${quest.xpTier.emoji} Reward: ${quest.xpTier.displayName} (+${quest.xpTier.xpValue} XP)")
+        }
+
+        val notification = NotificationCompat.Builder(context, CHANNEL_REMINDER_ID)
+            .setSmallIcon(R.drawable.ic_notification_sword)
+            .setContentTitle("🚨 Quest Due Now!")
+            .setContentText(quest.title)
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .bigText(expandedText)
+                    .setBigContentTitle("🚨 Quest Due Now!")
+                    .setSummaryText("$listEmoji $listName")
+            )
+            .setContentIntent(openAppIntent)
+            .addAction(0, "✓ Complete Quest", completePendingIntent)
+            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .build()
+
+        try {
+            NotificationManagerCompat.from(context).notify(notificationId, notification)
+        } catch (e: SecurityException) {
+            // Permission not granted
+        }
+    }
+
     fun cancelQuestReminder(context: Context, questId: Long) {
         val notificationId = (questId % 100_000L + 10_001L).toInt()
+        NotificationManagerCompat.from(context).cancel(notificationId)
+    }
+
+    fun cancelQuestDueNow(context: Context, questId: Long) {
+        val notificationId = (questId % 100_000L + 20_001L).toInt()
         NotificationManagerCompat.from(context).cancel(notificationId)
     }
 

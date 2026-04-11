@@ -224,14 +224,272 @@ object BackgroundRegistry {
             ),
             gradientColors = listOf(0xFFFCD34D, 0xFFD97706, 0xFF7C3AED),
             patternType = PatternType.SCALES
+        ),
+
+        // ── Class Backgrounds — Tier 1 (Uncommon) ────────────────────────────
+        ProfileBackground(
+            id = "bg_warrior",
+            displayName = "Iron & Blood",
+            flavorText = "Forged in the crucible of a thousand battles.",
+            xpTier = XPTier.SMALL,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("warrior"),
+            gradientColors = listOf(0xFFDC2626, 0xFF7F1D1D, 0xFF374151),
+            patternType = PatternType.TRIANGLES
+        ),
+        ProfileBackground(
+            id = "bg_mage",
+            displayName = "Arcane Depths",
+            flavorText = "Knowledge crystallised into colour and light.",
+            xpTier = XPTier.SMALL,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("mage"),
+            gradientColors = listOf(0xFF312E81, 0xFF4C1D95, 0xFF0D0B1A),
+            patternType = PatternType.HEXAGONS
+        ),
+        ProfileBackground(
+            id = "bg_rogue",
+            displayName = "Shadow Veil",
+            flavorText = "Seen only when they want to be seen.",
+            xpTier = XPTier.SMALL,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("rogue"),
+            gradientColors = listOf(0xFF064E3B, 0xFF14532D, 0xFF0F172A),
+            patternType = PatternType.DIAGONAL_LINES_DENSE
+        ),
+        ProfileBackground(
+            id = "bg_cleric",
+            displayName = "Sacred Dawn",
+            flavorText = "The warmth of conviction at first light.",
+            xpTier = XPTier.SMALL,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("cleric"),
+            gradientColors = listOf(0xFFFEF3C7, 0xFFFBBF24, 0xFFD97706),
+            patternType = PatternType.STARS
+        ),
+
+        // ── Class Backgrounds — Tier 2 (Rare) ────────────────────────────────
+        ProfileBackground(
+            id = "bg_knight",
+            displayName = "Castle Ramparts",
+            flavorText = "Stone laid by hands that swore to hold the line.",
+            xpTier = XPTier.MEDIUM,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("knight"),
+            gradientColors = listOf(0xFF475569, 0xFF334155, 0xFF1E40AF),
+            patternType = PatternType.BRICKS
+        ),
+        ProfileBackground(
+            id = "bg_berserker",
+            displayName = "Rage Surge",
+            flavorText = "Fury given form. Calm is a distant memory.",
+            xpTier = XPTier.MEDIUM,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("berserker"),
+            gradientColors = listOf(0xFFEA580C, 0xFFDC2626, 0xFF450A0A),
+            patternType = PatternType.CHEVRONS
+        ),
+        ProfileBackground(
+            id = "bg_pyromancer",
+            displayName = "Ember Fields",
+            flavorText = "Where obstacles stood, only ash remains.",
+            xpTier = XPTier.MEDIUM,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("pyromancer"),
+            gradientColors = listOf(0xFFFB923C, 0xFFEF4444, 0xFF1C0500),
+            patternType = PatternType.SCALES
+        ),
+        ProfileBackground(
+            id = "bg_necromancer",
+            displayName = "Cursed Crypt",
+            flavorText = "Even finished tasks whisper from beneath.",
+            xpTier = XPTier.MEDIUM,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("necromancer"),
+            gradientColors = listOf(0xFF4B0082, 0xFF1A0B2E, 0xFF000000),
+            patternType = PatternType.CROSSHATCH
+        ),
+        ProfileBackground(
+            id = "bg_assassin",
+            displayName = "Night's Edge",
+            flavorText = "The darkness isn't empty — it watches.",
+            xpTier = XPTier.MEDIUM,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("assassin"),
+            gradientColors = listOf(0xFF0F1113, 0xFF0F2418, 0xFF030712),
+            patternType = PatternType.DIAGONAL_LINES
+        ),
+        ProfileBackground(
+            id = "bg_ranger",
+            displayName = "Forest Canopy",
+            flavorText = "Every trail is just a quest not yet named.",
+            xpTier = XPTier.MEDIUM,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("ranger"),
+            gradientColors = listOf(0xFF14532D, 0xFF166534, 0xFF3D2100),
+            patternType = PatternType.LARGE_DOTS
+        ),
+        ProfileBackground(
+            id = "bg_paladin",
+            displayName = "Divine Thunder",
+            flavorText = "Righteousness, armoured in lightning.",
+            xpTier = XPTier.MEDIUM,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("paladin"),
+            gradientColors = listOf(0xFF1D4ED8, 0xFF7C3AED, 0xFFFBBF24),
+            patternType = PatternType.STARS
+        ),
+        ProfileBackground(
+            id = "bg_druid",
+            displayName = "Ancient Grove",
+            flavorText = "Roots older than memory, patience older than stone.",
+            xpTier = XPTier.MEDIUM,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("druid"),
+            gradientColors = listOf(0xFF15803D, 0xFF166534, 0xFF14532D),
+            patternType = PatternType.WAVES
+        ),
+
+        // ── Class Backgrounds — Tier 3 (Epic) ────────────────────────────────
+        ProfileBackground(
+            id = "bg_crusader",
+            displayName = "Holy Crusade",
+            flavorText = "A cause worth dying for is worth living for.",
+            xpTier = XPTier.LARGE,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("crusader"),
+            gradientColors = listOf(0xFFFCD34D, 0xFFFBBF24, 0xFFD97706),
+            patternType = PatternType.STARS
+        ),
+        ProfileBackground(
+            id = "bg_guardian",
+            displayName = "Eternal Fortress",
+            flavorText = "Nothing passes. Nothing ever has.",
+            xpTier = XPTier.LARGE,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("guardian"),
+            gradientColors = listOf(0xFF374151, 0xFF1F2937, 0xFF111827),
+            patternType = PatternType.BRICKS
+        ),
+        ProfileBackground(
+            id = "bg_warlord",
+            displayName = "Conqueror's Throne",
+            flavorText = "Claimed from those who dared to resist.",
+            xpTier = XPTier.LARGE,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("warlord"),
+            gradientColors = listOf(0xFFB91C1C, 0xFF991B1B, 0xFFD97706),
+            patternType = PatternType.DIAMONDS
+        ),
+        ProfileBackground(
+            id = "bg_juggernaut",
+            displayName = "Immovable",
+            flavorText = "The mountain does not negotiate.",
+            xpTier = XPTier.LARGE,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("juggernaut"),
+            gradientColors = listOf(0xFF292524, 0xFF1C1917, 0xFF0C0A09),
+            patternType = PatternType.CROSSHATCH
+        ),
+        ProfileBackground(
+            id = "bg_inferno_mage",
+            displayName = "Volcanic Fury",
+            flavorText = "Every overdue task burns brighter than the last.",
+            xpTier = XPTier.LARGE,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("inferno_mage"),
+            gradientColors = listOf(0xFFDC2626, 0xFFEA580C, 0xFF1C0500),
+            patternType = PatternType.SCALES
+        ),
+        ProfileBackground(
+            id = "bg_phoenix",
+            displayName = "Phoenix Rising",
+            flavorText = "Fallen behind? Rise. Always rise.",
+            xpTier = XPTier.LARGE,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("phoenix"),
+            gradientColors = listOf(0xFFFBBF24, 0xFFF97316, 0xFFDC2626),
+            patternType = PatternType.CHEVRONS
+        ),
+        ProfileBackground(
+            id = "bg_lich",
+            displayName = "Lich's Sanctum",
+            flavorText = "Mastery over tasks even death could not finish.",
+            xpTier = XPTier.LARGE,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("lich"),
+            gradientColors = listOf(0xFF7C3AED, 0xFF3D0066, 0xFF0D0B1A),
+            patternType = PatternType.HEXAGONS
+        ),
+        ProfileBackground(
+            id = "bg_soul_reaper",
+            displayName = "Soul Harvest",
+            flavorText = "Every completed quest is a soul claimed.",
+            xpTier = XPTier.LARGE,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("soul_reaper"),
+            gradientColors = listOf(0xFF4C1D95, 0xFF1E1B4B, 0xFF050314),
+            patternType = PatternType.DIAGONAL_LINES_DENSE
+        ),
+        ProfileBackground(
+            id = "bg_shadow_dancer",
+            displayName = "Twilight Waltz",
+            flavorText = "Graceful. Lethal. Invisible.",
+            xpTier = XPTier.LARGE,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("shadow_dancer"),
+            gradientColors = listOf(0xFF2D1B69, 0xFF1A0B2E, 0xFF030712),
+            patternType = PatternType.WAVES
+        ),
+        ProfileBackground(
+            id = "bg_phantom_blade",
+            displayName = "Phantom Realm",
+            flavorText = "The quest was done before you knew it began.",
+            xpTier = XPTier.LARGE,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("phantom_blade"),
+            gradientColors = listOf(0xFF94A3B8, 0xFF64748B, 0xFF1E293B),
+            patternType = PatternType.DIAGONAL_LINES
+        ),
+        ProfileBackground(
+            id = "bg_beastmaster",
+            displayName = "Wild Hunt",
+            flavorText = "Every task is just another creature to tame.",
+            xpTier = XPTier.LARGE,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("beastmaster"),
+            gradientColors = listOf(0xFF78350F, 0xFF3D2100, 0xFF14532D),
+            patternType = PatternType.DOTS
+        ),
+        ProfileBackground(
+            id = "bg_sharpshooter",
+            displayName = "Eagle's Sky",
+            flavorText = "Aim for the deadline. Never miss.",
+            xpTier = XPTier.LARGE,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("sharpshooter"),
+            gradientColors = listOf(0xFF0EA5E9, 0xFF0369A1, 0xFF065F46),
+            patternType = PatternType.DOTS
+        ),
+        ProfileBackground(
+            id = "bg_holy_avenger",
+            displayName = "Radiant Covenant",
+            flavorText = "Justice delivered, one overdue quest at a time.",
+            xpTier = XPTier.LARGE,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("holy_avenger"),
+            gradientColors = listOf(0xFFFEF9C3, 0xFFFCD34D, 0xFFEA580C),
+            patternType = PatternType.STARS
+        ),
+        ProfileBackground(
+            id = "bg_battle_priest",
+            displayName = "Sanctified Steel",
+            flavorText = "Blessed steel and unwavering conviction.",
+            xpTier = XPTier.LARGE,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("battle_priest"),
+            gradientColors = listOf(0xFF1D4ED8, 0xFF1E40AF, 0xFFD97706),
+            patternType = PatternType.GRID
+        ),
+        ProfileBackground(
+            id = "bg_shapeshifter",
+            displayName = "Dragon's Scale",
+            flavorText = "Adapt to any quest, any obstacle, any form.",
+            xpTier = XPTier.LARGE,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("shapeshifter"),
+            gradientColors = listOf(0xFF0D9488, 0xFF0F766E, 0xFF4C1D95),
+            patternType = PatternType.SCALES
+        ),
+        ProfileBackground(
+            id = "bg_summoner",
+            displayName = "Ethereal Rift",
+            flavorText = "Why do alone what an army can do together?",
+            xpTier = XPTier.LARGE,
+            unlockRequirement = UnlockRequirement.ClassUnlocked("summoner"),
+            gradientColors = listOf(0xFF9333EA, 0xFFDB2777, 0xFF4C1D95),
+            patternType = PatternType.WAVES
         )
     )
 
     fun getById(id: String): ProfileBackground = ALL.find { it.id == id } ?: ALL.first()
 
-    fun unlockedFor(profile: com.thexm.todoquest.data.model.PlayerProfile): List<ProfileBackground> =
-        ALL.filter { it.unlockRequirement.isMet(profile) }
+    fun unlockedFor(profile: PlayerProfile, xpPerClass: Map<String, Long> = emptyMap()): List<ProfileBackground> =
+        ALL.filter { it.unlockRequirement.isMet(profile, xpPerClass) }
 
-    fun isUnlocked(id: String, profile: com.thexm.todoquest.data.model.PlayerProfile): Boolean =
-        getById(id).unlockRequirement.isMet(profile)
+    fun isUnlocked(id: String, profile: PlayerProfile, xpPerClass: Map<String, Long> = emptyMap()): Boolean =
+        getById(id).unlockRequirement.isMet(profile, xpPerClass)
 }

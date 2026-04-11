@@ -9,43 +9,54 @@ object QuestReminderScheduler {
 
     private const val REMINDER_HOURS_BEFORE = 4L
     private fun workName(questId: Long) = "quest_reminder_$questId"
+    private fun dueNowWorkName(questId: Long) = "quest_due_now_$questId"
 
     /**
-     * Schedule (or re-schedule) a 4-hour-before reminder for [quest].
-     * Does nothing if the quest has no due date, or the reminder time is already in the past.
+     * Schedule (or re-schedule) a 4-hour-before reminder and a due-now notification for [quest].
+     * Does nothing if the quest has no due date, or both trigger times are already in the past.
      */
     fun schedule(context: Context, quest: Quest) {
         val dueDateMillis = quest.dueDateMillis ?: run {
-            cancel(context, quest.id) // due date removed — clear any old reminder
+            cancel(context, quest.id) // due date removed — clear any old reminders
             return
         }
 
+        val now = System.currentTimeMillis()
         val reminderAtMillis = dueDateMillis - REMINDER_HOURS_BEFORE * 60 * 60 * 1000L
-        val delayMs = reminderAtMillis - System.currentTimeMillis()
+        val reminderDelayMs = reminderAtMillis - now
+        val dueNowDelayMs = dueDateMillis - now
 
-        // Always cancel the previous work first so REPLACE takes effect correctly
+        // Always cancel previous work first so REPLACE takes effect correctly
         cancel(context, quest.id)
 
-        // Skip if we're already past the reminder window (> 1 min late)
-        if (delayMs < -60_000L) return
-
         val data = workDataOf("quest_id" to quest.id)
+        val wm = WorkManager.getInstance(context)
 
-        val request = OneTimeWorkRequestBuilder<QuestReminderWorker>()
-            .setInitialDelay(maxOf(0L, delayMs), TimeUnit.MILLISECONDS)
-            .setInputData(data)
-            .addTag("quest_reminder")
-            .build()
+        // Schedule 4-hour advance reminder if not yet past the window (> 1 min late)
+        if (reminderDelayMs >= -60_000L) {
+            val request = OneTimeWorkRequestBuilder<QuestReminderWorker>()
+                .setInitialDelay(maxOf(0L, reminderDelayMs), TimeUnit.MILLISECONDS)
+                .setInputData(data)
+                .addTag("quest_reminder")
+                .build()
+            wm.enqueueUniqueWork(workName(quest.id), ExistingWorkPolicy.REPLACE, request)
+        }
 
-        WorkManager.getInstance(context).enqueueUniqueWork(
-            workName(quest.id),
-            ExistingWorkPolicy.REPLACE,
-            request
-        )
+        // Schedule due-now notification if the due date hasn't passed yet (> 1 min late)
+        if (dueNowDelayMs >= -60_000L) {
+            val request = OneTimeWorkRequestBuilder<QuestDueNowWorker>()
+                .setInitialDelay(maxOf(0L, dueNowDelayMs), TimeUnit.MILLISECONDS)
+                .setInputData(data)
+                .addTag("quest_due_now")
+                .build()
+            wm.enqueueUniqueWork(dueNowWorkName(quest.id), ExistingWorkPolicy.REPLACE, request)
+        }
     }
 
-    /** Cancel any pending reminder for [questId]. */
+    /** Cancel any pending reminders for [questId]. */
     fun cancel(context: Context, questId: Long) {
-        WorkManager.getInstance(context).cancelUniqueWork(workName(questId))
+        val wm = WorkManager.getInstance(context)
+        wm.cancelUniqueWork(workName(questId))
+        wm.cancelUniqueWork(dueNowWorkName(questId))
     }
 }

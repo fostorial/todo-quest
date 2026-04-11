@@ -24,8 +24,10 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.thexm.todoquest.QuestApplication
+import com.thexm.todoquest.data.model.BackgroundRegistry
 import com.thexm.todoquest.data.model.HeroClassRegistry
 import com.thexm.todoquest.data.model.PlayerProfile
+import com.thexm.todoquest.data.model.ProfileBackground
 import com.thexm.todoquest.data.model.Title
 import com.thexm.todoquest.data.model.TitleRegistry
 import com.thexm.todoquest.data.model.XPTier
@@ -41,6 +43,7 @@ data class ProfileHeaderState(
     val heroName: String = "Hero",
     val level: Int = 1,
     val selectedTitle: Title = TitleRegistry.ALL.first(),
+    val selectedBackground: ProfileBackground = BackgroundRegistry.ALL.first(),
     val classEmoji: String = "🧭",
     val xpProgressFraction: Float = 0f,
     val xpInLevel: Long = 0,
@@ -58,6 +61,7 @@ class ProfileHeaderViewModel(application: Application) : AndroidViewModel(applic
                 heroName = p.heroName,
                 level = p.level,
                 selectedTitle = TitleRegistry.getById(p.selectedTitleId),
+                selectedBackground = BackgroundRegistry.getById(p.selectedBackgroundId),
                 classEmoji = HeroClassRegistry.getById(p.selectedClassId).emoji,
                 xpProgressFraction = LevelCalculator.progressFraction(p.totalXP),
                 xpInLevel = LevelCalculator.xpInCurrentLevel(p.totalXP),
@@ -85,14 +89,24 @@ fun ProfileHeaderBar(
         XPTier.EPIC   -> QuestGoldLight
     }
 
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .statusBarsPadding()
+            .clickable(onClick = onTap)
+    ) {
+        ProfileBackgroundCanvas(
+            background = state.selectedBackground,
+            modifier = Modifier.matchParentSize()
+        )
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(Color.Black.copy(alpha = 0.45f))
+        )
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                Brush.horizontalGradient(listOf(QuestPurpleDark, QuestPurple))
-            )
-            .statusBarsPadding()
-            .clickable(onClick = onTap)
             .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -177,4 +191,5 @@ fun ProfileHeaderBar(
             )
         }
     }
+    } // end outer Box
 }

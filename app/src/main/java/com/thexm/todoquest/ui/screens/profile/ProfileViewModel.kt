@@ -16,6 +16,8 @@ import com.thexm.todoquest.notification.QuestNotificationManager
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 
 data class ProfileUiState(
     val profile: PlayerProfile = PlayerProfile(),
@@ -37,6 +39,9 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
     private val app = application as QuestApplication
     private val playerRepo = app.playerRepository
 
+    private val _snackbarChannel = Channel<String>(Channel.BUFFERED)
+    val snackbarEvents = _snackbarChannel.receiveAsFlow()
+
     private val _isEditingName = MutableStateFlow(false)
     private val _editName = MutableStateFlow("")
     private val _showTitlesDialog = MutableStateFlow(false)
@@ -46,6 +51,29 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
 
     private val _classProgress = playerRepo.getAllClassProgress()
         .map { list -> list.associate { it.classId to it.xpEarned } }
+
+    init {
+        viewModelScope.launch {
+            var prevTitles: Set<String>? = null
+            var prevBackgrounds: Set<String>? = null
+            combine(playerRepo.getProfile(), _classProgress) { profile, xpPerClass ->
+                val p = profile ?: PlayerProfile()
+                TitleRegistry.unlockedFor(p.level, xpPerClass).map { it.id }.toSet() to
+                    BackgroundRegistry.unlockedFor(p, xpPerClass).map { it.id }.toSet()
+            }.collect { (titles, backgrounds) ->
+                if (prevTitles != null) {
+                    for (id in titles - prevTitles!!) {
+                        _snackbarChannel.send("Title unlocked: ${TitleRegistry.getById(id).displayName}")
+                    }
+                    for (id in backgrounds - prevBackgrounds!!) {
+                        _snackbarChannel.send("Background unlocked: ${BackgroundRegistry.getById(id).displayName}")
+                    }
+                }
+                prevTitles = titles
+                prevBackgrounds = backgrounds
+            }
+        }
+    }
 
     val uiState: StateFlow<ProfileUiState> = combine(
         combine(playerRepo.getProfile(), _isEditingName, _editName) { p, e, n -> Triple(p, e, n) },
@@ -65,7 +93,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
             selectedTitle = TitleRegistry.getById(safeProfile.selectedTitleId),
             selectedBackground = BackgroundRegistry.getById(safeProfile.selectedBackgroundId),
             selectedClass = HeroClassRegistry.getById(safeProfile.selectedClassId),
-            unlockedTitles = TitleRegistry.unlockedFor(safeProfile.level),
+            unlockedTitles = TitleRegistry.unlockedFor(safeProfile.level, xpPerClass),
             xpPerClass = xpPerClass
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ProfileUiState())
@@ -95,7 +123,10 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
     fun selectTitle(titleId: String) {
         viewModelScope.launch {
             val profile = playerRepo.getOrCreateProfile()
-            if (TitleRegistry.isUnlocked(titleId, profile.level)) {
+            val xpPerClass = playerRepo.getAllClassProgress()
+                .map { list -> list.associate { it.classId to it.xpEarned } }
+                .first()
+            if (TitleRegistry.isUnlocked(titleId, profile.level, xpPerClass)) {
                 playerRepo.updateProfile(profile.copy(selectedTitleId = titleId))
             }
             _showTitlesDialog.value = false
@@ -128,7 +159,10 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
     fun selectBackground(backgroundId: String) {
         viewModelScope.launch {
             val profile = playerRepo.getOrCreateProfile()
-            if (BackgroundRegistry.isUnlocked(backgroundId, profile)) {
+            val xpPerClass = playerRepo.getAllClassProgress()
+                .map { list -> list.associate { it.classId to it.xpEarned } }
+                .first()
+            if (BackgroundRegistry.isUnlocked(backgroundId, profile, xpPerClass)) {
                 playerRepo.updateProfile(profile.copy(selectedBackgroundId = backgroundId))
             }
             _showBackgroundsDialog.value = false

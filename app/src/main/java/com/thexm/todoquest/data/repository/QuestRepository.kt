@@ -18,6 +18,7 @@ class QuestRepository(
     fun getCompletedQuestsForList(listId: Long): Flow<List<Quest>> = questDao.getCompletedQuestsForList(listId)
     fun getUpcomingQuests(now: Long): Flow<List<Quest>> = questDao.getUpcomingQuests(now)
     fun getOverdueQuests(now: Long): Flow<List<Quest>> = questDao.getOverdueQuests(now)
+    fun getNoDueDateQuests(): Flow<List<Quest>> = questDao.getNoDueDateQuests()
 
     suspend fun getListById(id: Long): QuestList? = questListDao.getListById(id)
     suspend fun getQuestById(id: Long): Quest? = questDao.getQuestById(id)

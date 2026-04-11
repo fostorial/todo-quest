@@ -24,6 +24,7 @@ import com.thexm.todoquest.ui.theme.QuestPurpleLight
 @Composable
 fun LevelBadge(
     level: Int,
+    classEmoji: String = "🧭",
     size: Dp = 56.dp,
     modifier: Modifier = Modifier
 ) {
@@ -39,7 +40,7 @@ fun LevelBadge(
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "⚔️",
+                text = classEmoji,
                 fontSize = (size.value * 0.3f).sp
             )
             Text(

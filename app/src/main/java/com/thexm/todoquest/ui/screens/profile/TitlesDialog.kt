@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.thexm.todoquest.data.model.HeroClassRegistry
 import com.thexm.todoquest.data.model.Title
 import com.thexm.todoquest.data.model.TitleRegistry
 import com.thexm.todoquest.data.model.XPTier
@@ -30,6 +31,7 @@ import com.thexm.todoquest.ui.theme.*
 fun TitlesDialog(
     playerLevel: Int,
     selectedTitleId: String,
+    xpPerClass: Map<String, Long>,
     onSelectTitle: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -51,7 +53,9 @@ fun TitlesDialog(
                 // Group order: null (default) first, then each XPTier in order
                 val tierOrder: List<XPTier?> = listOf(null) + XPTier.entries.toList()
                 tierOrder.forEach { tier ->
-                    val titlesInGroup = TitleRegistry.ALL.filter { it.xpTier == tier }
+                    val titlesInGroup = TitleRegistry.ALL.filter {
+                        it.xpTier == tier && it.classRequired == null
+                    }
                     if (titlesInGroup.isNotEmpty()) {
                         item {
                             TierSectionHeader(tier = tier)
@@ -63,9 +67,30 @@ fun TitlesDialog(
                                 title = title,
                                 unlocked = unlocked,
                                 isSelected = isSelected,
+                                unlockHint = "Unlocks at Level ${title.levelRequired}",
                                 onClick = { if (unlocked) onSelectTitle(title.id) }
                             )
                         }
+                    }
+                }
+
+                // Class titles section
+                val classTitles = TitleRegistry.classTitles()
+                if (classTitles.isNotEmpty()) {
+                    item {
+                        ClassTitleSectionHeader()
+                    }
+                    items(classTitles) { title ->
+                        val unlocked = HeroClassRegistry.isUnlocked(title.classRequired!!, xpPerClass)
+                        val isSelected = title.id == selectedTitleId
+                        val parentClass = HeroClassRegistry.getById(title.classRequired)
+                        TitleRow(
+                            title = title,
+                            unlocked = unlocked,
+                            isSelected = isSelected,
+                            unlockHint = "Unlock the ${parentClass.displayName} class",
+                            onClick = { if (unlocked) onSelectTitle(title.id) }
+                        )
                     }
                 }
             }
@@ -107,10 +132,30 @@ private fun TierSectionHeader(tier: XPTier?) {
 }
 
 @Composable
+private fun ClassTitleSectionHeader() {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(top = 4.dp, bottom = 2.dp)
+    ) {
+        Text("⚜️", fontSize = 14.sp)
+        Spacer(Modifier.width(6.dp))
+        Text(
+            text = "Class",
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF64B5F6)
+        )
+        Spacer(Modifier.width(8.dp))
+        Divider(modifier = Modifier.weight(1f), color = Color(0xFF64B5F6).copy(alpha = 0.4f))
+    }
+}
+
+@Composable
 private fun TitleRow(
     title: Title,
     unlocked: Boolean,
     isSelected: Boolean,
+    unlockHint: String,
     onClick: () -> Unit
 ) {
     val tierColor = when (title.xpTier) {
@@ -170,7 +215,7 @@ private fun TitleRow(
             if (!unlocked) {
                 Spacer(Modifier.height(2.dp))
                 Text(
-                    text = "Unlocks at Level ${title.levelRequired}",
+                    text = unlockHint,
                     style = MaterialTheme.typography.labelSmall,
                     color = tierColor.copy(alpha = 0.8f),
                     fontWeight = FontWeight.Medium

@@ -22,6 +22,9 @@ interface QuestDao {
     @Query("SELECT * FROM quests WHERE isCompleted = 0 AND dueDateMillis IS NOT NULL AND dueDateMillis < :now ORDER BY dueDateMillis ASC")
     fun getOverdueQuests(now: Long): Flow<List<Quest>>
 
+    @Query("SELECT * FROM quests WHERE isCompleted = 0 AND dueDateMillis IS NULL ORDER BY isPinned DESC, createdAtMillis DESC")
+    fun getNoDueDateQuests(): Flow<List<Quest>>
+
     @Query("SELECT COUNT(*) FROM quests WHERE isCompleted = 0")
     fun getActiveQuestCount(): Flow<Int>
 

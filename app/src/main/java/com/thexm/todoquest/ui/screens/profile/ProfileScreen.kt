@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -31,6 +32,14 @@ import com.thexm.todoquest.util.LevelCalculator
 fun ProfileScreen(viewModel: ProfileViewModel = viewModel()) {
     val uiState by viewModel.uiState.collectAsState()
     val profile = uiState.profile
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        viewModel.snackbarEvents.collect { message ->
+            scope.launch { snackbarHostState.showSnackbar(message) }
+        }
+    }
 
     if (uiState.showClassDialog) {
         ClassTreeDialog(
@@ -44,6 +53,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = viewModel()) {
     if (uiState.showBackgroundsDialog) {
         BackgroundsDialog(
             profile = profile,
+            xpPerClass = uiState.xpPerClass,
             selectedBackgroundId = profile.selectedBackgroundId,
             onSelect = viewModel::selectBackground,
             onDismiss = viewModel::closeBackgroundsDialog
@@ -54,6 +64,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = viewModel()) {
         TitlesDialog(
             playerLevel = profile.level,
             selectedTitleId = profile.selectedTitleId,
+            xpPerClass = uiState.xpPerClass,
             onSelectTitle = viewModel::selectTitle,
             onDismiss = viewModel::closeTitlesDialog
         )
@@ -80,6 +91,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = viewModel()) {
         )
     }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -107,7 +119,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = viewModel()) {
                     .fillMaxWidth()
                     .padding(24.dp)
             ) {
-                LevelBadge(level = profile.level, size = 72.dp)
+                LevelBadge(level = profile.level, classEmoji = uiState.selectedClass.emoji, size = 72.dp)
                 Spacer(Modifier.height(12.dp))
 
                 if (uiState.isEditingName) {
@@ -298,6 +310,11 @@ fun ProfileScreen(viewModel: ProfileViewModel = viewModel()) {
 
             Spacer(Modifier.height(16.dp))
         }
+    }
+    SnackbarHost(
+        hostState = snackbarHostState,
+        modifier = Modifier.align(Alignment.BottomCenter)
+    )
     }
 }
 

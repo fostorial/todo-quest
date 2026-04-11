@@ -26,6 +26,7 @@ data class QuestWithList(
 data class ActiveUiState(
     val overdueQuests: List<QuestWithList> = emptyList(),
     val upcomingQuests: List<QuestWithList> = emptyList(),
+    val noDueDateQuests: List<QuestWithList> = emptyList(),
     val isLoading: Boolean = true,
     val levelUpEvent: Int? = null,
     val completionEvent: CompletionEvent? = null,
@@ -55,12 +56,13 @@ class ActiveViewModel(application: Application) : AndroidViewModel(application) 
             combine(
                 questRepo.getOverdueQuests(now),
                 questRepo.getUpcomingQuests(now),
-                questRepo.getAllLists()
-            ) { overdue, upcoming, lists ->
+                combine(questRepo.getNoDueDateQuests(), questRepo.getAllLists()) { noDue, lists -> noDue to lists }
+            ) { overdue, upcoming, (noDue, lists) ->
                 val listMap = lists.associateBy { it.id }
                 ActiveUiState(
                     overdueQuests = overdue.map { it.toWithList(listMap) },
                     upcomingQuests = upcoming.map { it.toWithList(listMap) },
+                    noDueDateQuests = noDue.map { it.toWithList(listMap) },
                     isLoading = false
                 )
             }

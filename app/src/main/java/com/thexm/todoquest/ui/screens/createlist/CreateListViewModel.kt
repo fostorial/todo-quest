@@ -5,10 +5,14 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.thexm.todoquest.QuestApplication
+import com.thexm.todoquest.data.model.HeroClassRegistry
 import com.thexm.todoquest.data.model.QuestList
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -18,7 +22,8 @@ data class CreateListState(
     val colorHex: String = "#8B5CF6",
     val isEditing: Boolean = false,
     val isSaving: Boolean = false,
-    val nameError: String? = null
+    val nameError: String? = null,
+    val unlockedClassEmojis: List<String> = emptyList()
 )
 
 val PRESET_COLORS = listOf(
@@ -30,13 +35,15 @@ val PRESET_COLORS = listOf(
     "#991B1B", "#9D174D", "#164E63", "#3F6212"
 )
 
+// Emojis that are always available. Class-specific emojis (tier 1+) are unlocked separately
+// and must not overlap with this list — overlapping originals have been replaced.
 val PRESET_EMOJIS = listOf(
-    // Row 1 — fantasy combat
-    "📜", "⚔️", "🏰", "🗡️", "🧙", "🐉", "🏆", "💎",
+    // Row 1 — fantasy staples
+    "📜", "🧭", "🏯", "🗝️", "🧙", "🦁", "🏆", "💎",
     // Row 2 — magic & exploration
-    "🌟", "🔮", "🛡️", "🧪", "🗺️", "🌙", "🦄", "🔱",
-    // Row 3 — nature & daily life
-    "🌿", "🔥", "💀", "🎯", "🍀", "⚡", "🎪", "🏹"
+    "🌟", "🪄", "📖", "🧪", "🗺️", "🌙", "🦄", "🔱",
+    // Row 3 — atmosphere & daily life
+    "🌸", "💫", "🕯️", "🏅", "🍀", "🌊", "🎪", "⛏️"
 )
 
 class CreateListViewModel(
@@ -47,9 +54,20 @@ class CreateListViewModel(
     private val listId: Long = savedStateHandle["listId"] ?: -1L
     private val app = application as QuestApplication
     private val questRepo = app.questRepository
+    private val playerRepo = app.playerRepository
 
     private val _state = MutableStateFlow(CreateListState(isEditing = listId != -1L))
     val state: StateFlow<CreateListState> = _state.asStateFlow()
+
+    // Emojis from unlocked classes (tier 1+; adventurer/🧭 is already a preset)
+    val unlockedClassEmojis: StateFlow<List<String>> = playerRepo.getAllClassProgress()
+        .map { progressList ->
+            val xpPerClass = progressList.associate { it.classId to it.xpEarned }
+            HeroClassRegistry.unlockedClasses(xpPerClass)
+                .filter { it.id != HeroClassRegistry.ROOT_ID }
+                .map { it.emoji }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     init {
         if (listId != -1L) {

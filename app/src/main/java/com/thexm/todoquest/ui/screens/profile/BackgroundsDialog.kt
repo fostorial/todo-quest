@@ -30,6 +30,7 @@ import com.thexm.todoquest.ui.theme.*
 @Composable
 fun BackgroundsDialog(
     profile: PlayerProfile,
+    xpPerClass: Map<String, Long>,
     selectedBackgroundId: String,
     onSelect: (String) -> Unit,
     onDismiss: () -> Unit
@@ -55,7 +56,7 @@ fun BackgroundsDialog(
                     if (group.isNotEmpty()) {
                         item { TierHeader(tier) }
                         items(group) { bg ->
-                            val unlocked = bg.unlockRequirement.isMet(profile)
+                            val unlocked = bg.unlockRequirement.isMet(profile, xpPerClass)
                             val selected = bg.id == selectedBackgroundId
                             BackgroundRow(
                                 background = bg,

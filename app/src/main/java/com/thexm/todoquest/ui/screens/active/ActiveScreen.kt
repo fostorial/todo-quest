@@ -100,10 +100,12 @@ fun ActiveScreen(
                     Spacer(Modifier.height(4.dp))
                     val overdueCount = uiState.overdueQuests.size
                     val upcomingCount = uiState.upcomingQuests.size
+                    val noDueDateCount = uiState.noDueDateQuests.size
                     Text(
                         text = buildString {
                             if (overdueCount > 0) append("$overdueCount overdue  •  ")
                             append("$upcomingCount upcoming")
+                            if (noDueDateCount > 0) append("  •  $noDueDateCount open")
                         },
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White.copy(alpha = 0.85f)
@@ -165,8 +167,29 @@ fun ActiveScreen(
             }
         }
 
+        // ── No due date section ──────────────────────────────────────────────
+        if (uiState.noDueDateQuests.isNotEmpty()) {
+            item {
+                SectionHeader(
+                    emoji = "📋",
+                    title = "Open",
+                    count = uiState.noDueDateQuests.size,
+                    headerColor = Color(0xFF6B7280)
+                )
+            }
+            items(uiState.noDueDateQuests, key = { "open_${it.quest.id}" }) { qwl ->
+                QuestWithListCard(
+                    questWithList = qwl,
+                    onComplete = { viewModel.completeQuest(qwl.quest) },
+                    onPin = { viewModel.togglePin(qwl.quest) },
+                    onDelete = { viewModel.promptDeleteQuest(qwl.quest) },
+                    onEdit = { onEditQuest(qwl.quest) }
+                )
+            }
+        }
+
         // ── Empty state ──────────────────────────────────────────────────────
-        if (!uiState.isLoading && uiState.overdueQuests.isEmpty() && uiState.upcomingQuests.isEmpty()) {
+        if (!uiState.isLoading && uiState.overdueQuests.isEmpty() && uiState.upcomingQuests.isEmpty() && uiState.noDueDateQuests.isEmpty()) {
             item { EmptyActiveState() }
         }
     }
@@ -286,7 +309,7 @@ private fun EmptyActiveState() {
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            text = "No quests with due dates yet.\nAdd a due date to a quest to see it here.",
+            text = "No active quests yet.\nCreate a quest to get started!",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
