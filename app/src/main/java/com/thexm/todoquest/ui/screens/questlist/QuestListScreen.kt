@@ -1,5 +1,6 @@
 package com.thexm.todoquest.ui.screens.questlist
 
+import android.content.Intent
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -37,8 +39,21 @@ fun QuestListScreen(
     onEditQuest: (Quest) -> Unit,
     viewModel: QuestListViewModel = viewModel()
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    // Launch share sheet when share URI is ready
+    LaunchedEffect(Unit) {
+        viewModel.shareEvent.collect { (uri, boardName) ->
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "application/x-questboard"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            context.startActivity(Intent.createChooser(intent, "Share \"$boardName\" scroll"))
+        }
+    }
 
     // Level-up dialog
     uiState.levelUpEvent?.let { newLevel ->
@@ -104,6 +119,10 @@ fun QuestListScreen(
                             color = Color.White,
                             modifier = Modifier.weight(1f)
                         )
+                        // Share board
+                        IconButton(onClick = { viewModel.shareBoard(context) }) {
+                            Icon(Icons.Default.Share, contentDescription = "Share board", tint = Color.White.copy(alpha = 0.85f))
+                        }
                         // Clear completed button
                         if (uiState.completedQuests.isNotEmpty()) {
                             IconButton(onClick = viewModel::clearCompleted) {

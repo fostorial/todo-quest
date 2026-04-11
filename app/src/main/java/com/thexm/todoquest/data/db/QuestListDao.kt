@@ -13,6 +13,9 @@ interface QuestListDao {
     @Query("SELECT * FROM quest_lists WHERE id = :id")
     suspend fun getListById(id: Long): QuestList?
 
+    @Query("SELECT * FROM quest_lists WHERE shareId = :shareId LIMIT 1")
+    suspend fun getListByShareId(shareId: String): QuestList?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertList(questList: QuestList): Long
 

@@ -1,7 +1,9 @@
 package com.thexm.todoquest
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -39,10 +41,19 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             ToDoQuestTheme {
-                QuestApp()
+                QuestApp(initialImportUri = extractImportUri(intent))
             }
         }
     }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        (application as? QuestApplication)?.pendingImportUri?.value = extractImportUri(intent)
+    }
+
+    private fun extractImportUri(intent: Intent?): Uri? =
+        if (intent?.action == Intent.ACTION_VIEW) intent.data else null
 
     private fun requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -57,7 +68,15 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun QuestApp() {
+fun QuestApp(initialImportUri: Uri? = null) {
+    val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as QuestApplication
+
+    LaunchedEffect(initialImportUri) {
+        if (initialImportUri != null) app.pendingImportUri.value = initialImportUri
+    }
+
+    val pendingImportUri by app.pendingImportUri
+
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -130,7 +149,11 @@ fun QuestApp() {
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-            QuestNavHost(navController = navController)
+            QuestNavHost(
+                navController = navController,
+                pendingImportUri = pendingImportUri,
+                onImportConsumed = { app.pendingImportUri.value = null }
+            )
         }
     }
 }

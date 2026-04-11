@@ -1,5 +1,6 @@
 package com.thexm.todoquest.ui.navigation
 
+import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -34,7 +35,11 @@ sealed class Screen(val route: String) {
 }
 
 @Composable
-fun QuestNavHost(navController: NavHostController) {
+fun QuestNavHost(
+    navController: NavHostController,
+    pendingImportUri: Uri? = null,
+    onImportConsumed: () -> Unit = {}
+) {
     NavHost(navController = navController, startDestination = Screen.Home.route) {
 
         composable(Screen.Home.route) {
@@ -45,7 +50,9 @@ fun QuestNavHost(navController: NavHostController) {
                 onCreateList = { navController.navigate(Screen.CreateList.createRoute()) },
                 onEditList = { list ->
                     navController.navigate(Screen.CreateList.createRoute(list.id))
-                }
+                },
+                pendingImportUri = pendingImportUri,
+                onImportConsumed = onImportConsumed
             )
         }
 

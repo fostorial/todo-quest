@@ -10,5 +10,7 @@ data class QuestList(
     val emoji: String = "📜",
     val colorHex: String = "#8B5CF6",
     val createdAtMillis: Long = System.currentTimeMillis(),
-    val sortOrder: Int = 0
+    val sortOrder: Int = 0,
+    // Stable ID assigned on first export; used to match the same board across devices on re-import
+    val shareId: String? = null
 )

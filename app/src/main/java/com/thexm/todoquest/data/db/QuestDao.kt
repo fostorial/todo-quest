@@ -31,6 +31,9 @@ interface QuestDao {
     @Query("SELECT * FROM quests WHERE id = :id")
     suspend fun getQuestById(id: Long): Quest?
 
+    @Query("SELECT * FROM quests WHERE listId = :listId")
+    suspend fun getQuestsForListOnce(listId: Long): List<Quest>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertQuest(quest: Quest): Long
 

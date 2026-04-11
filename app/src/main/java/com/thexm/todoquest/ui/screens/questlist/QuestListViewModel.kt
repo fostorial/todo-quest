@@ -1,10 +1,13 @@
 package com.thexm.todoquest.ui.screens.questlist
 
 import android.app.Application
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.thexm.todoquest.QuestApplication
+import com.thexm.todoquest.data.ShareManager
 import com.thexm.todoquest.data.model.Quest
 import com.thexm.todoquest.data.model.QuestList
 import com.thexm.todoquest.data.model.RecurrenceType
@@ -12,8 +15,11 @@ import com.thexm.todoquest.notification.NotificationUpdateWorker
 import com.thexm.todoquest.notification.QuestNotificationManager
 import com.thexm.todoquest.notification.QuestReminderScheduler
 import com.thexm.todoquest.util.RecurrenceCalculator
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 data class CompletionEvent(
     val questTitle: String,
@@ -143,6 +149,26 @@ class QuestListViewModel(
 
     fun dismissLevelUp() { _levelUpEvent.value = null }
     fun dismissCompletion() { _completionEvent.value = null }
+
+    // ── Share ────────────────────────────────────────────────────────────────
+
+    private val _shareEvent = Channel<Pair<Uri, String>>(Channel.BUFFERED)
+    val shareEvent: Flow<Pair<Uri, String>> = _shareEvent.receiveAsFlow()
+
+    fun shareBoard(context: Context) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val list = questRepo.getListById(listId) ?: return@launch
+            val listToShare = if (list.shareId == null) {
+                val updated = list.copy(shareId = UUID.randomUUID().toString())
+                questRepo.updateList(updated)
+                updated
+            } else list
+
+            val quests = questRepo.getQuestsForListOnce(listToShare.id).filter { !it.isCompleted }
+            val uri = ShareManager.createShareUri(context, listToShare, quests)
+            _shareEvent.send(uri to listToShare.name)
+        }
+    }
 
     private fun refreshNotification() {
         NotificationUpdateWorker.scheduleImmediate(getApplication())

@@ -21,7 +21,9 @@ class QuestRepository(
     fun getNoDueDateQuests(): Flow<List<Quest>> = questDao.getNoDueDateQuests()
 
     suspend fun getListById(id: Long): QuestList? = questListDao.getListById(id)
+    suspend fun getListByShareId(shareId: String): QuestList? = questListDao.getListByShareId(shareId)
     suspend fun getQuestById(id: Long): Quest? = questDao.getQuestById(id)
+    suspend fun getQuestsForListOnce(listId: Long): List<Quest> = questDao.getQuestsForListOnce(listId)
 
     suspend fun insertList(questList: QuestList): Long = questListDao.insertList(questList)
     suspend fun updateList(questList: QuestList) = questListDao.updateList(questList)

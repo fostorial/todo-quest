@@ -1,5 +1,6 @@
 package com.thexm.todoquest.ui.screens.home
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,11 +31,23 @@ fun HomeScreen(
     onNavigateToList: (Long) -> Unit,
     onCreateList: () -> Unit,
     onEditList: (QuestList) -> Unit,
+    pendingImportUri: Uri? = null,
+    onImportConsumed: () -> Unit = {},
     viewModel: HomeViewModel = viewModel()
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
     val activeCountPerList by viewModel.activeCountPerList.collectAsState()
+    val importResult by viewModel.importResult.collectAsState()
     var showDeleteConfirm by remember { mutableStateOf<QuestList?>(null) }
+
+    // Trigger import whenever a new URI arrives
+    LaunchedEffect(pendingImportUri) {
+        if (pendingImportUri != null) {
+            onImportConsumed()
+            viewModel.importBoard(context, pendingImportUri)
+        }
+    }
 
     Scaffold(
         floatingActionButton = {
@@ -141,6 +155,38 @@ fun HomeScreen(
                 TextButton(onClick = { showDeleteConfirm = null }) { Text("Cancel") }
             }
         )
+    }
+
+    // Import result dialog
+    importResult?.let { result ->
+        when (result) {
+            is ImportResult.Success -> AlertDialog(
+                onDismissRequest = { viewModel.clearImportResult() },
+                title = { Text(if (result.wasUpdate) "📜 Board Updated!" else "📜 Board Received!") },
+                text = {
+                    Text(if (result.wasUpdate)
+                        "\"${result.boardName}\" has been updated. Your completed quests are preserved."
+                    else
+                        "\"${result.boardName}\" has been added to your quest boards.")
+                },
+                confirmButton = {
+                    TextButton(onClick = { viewModel.clearImportResult(); onNavigateToList(result.listId) }) {
+                        Text("Open Board", color = QuestPurple, fontWeight = FontWeight.Bold)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { viewModel.clearImportResult() }) { Text("Dismiss") }
+                }
+            )
+            is ImportResult.Error -> AlertDialog(
+                onDismissRequest = { viewModel.clearImportResult() },
+                title = { Text("Import Failed") },
+                text = { Text(result.message) },
+                confirmButton = {
+                    TextButton(onClick = { viewModel.clearImportResult() }) { Text("OK") }
+                }
+            )
+        }
     }
 }
 
