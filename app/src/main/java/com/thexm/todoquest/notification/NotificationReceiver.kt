@@ -22,6 +22,8 @@ class NotificationReceiver : BroadcastReceiver() {
                             app.questRepository.completeQuest(questId)
                             app.playerRepository.awardXP(quest.xpTier.xpValue)
                             app.playerRepository.recordQuestCompletion(quest.xpTier)
+                            QuestNotificationManager.cancelQuestReminder(context, questId)
+                            QuestNotificationManager.cancelQuestDueNow(context, questId)
                             NotificationUpdateWorker.scheduleImmediate(context)
                         }
                     }

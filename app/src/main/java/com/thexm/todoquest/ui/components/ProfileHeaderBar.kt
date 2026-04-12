@@ -111,8 +111,64 @@ fun ProfileHeaderBar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Level badge with class emoji overlay
-        Box(contentAlignment = Alignment.BottomEnd) {
+        // Class icon — prominent circle on the left
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.15f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(state.classEmoji, fontSize = 24.sp)
+        }
+
+        // Name + title
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = state.heroName,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = state.selectedTitle.displayName,
+                style = MaterialTheme.typography.labelSmall,
+                color = titleColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        // XP progress + level circle
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Column(
+                horizontalAlignment = Alignment.End,
+                modifier = Modifier.width(90.dp)
+            ) {
+                Text(
+                    text = "${state.xpInLevel} / ${state.xpForNextLevel} XP",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White.copy(alpha = 0.75f),
+                    fontSize = 9.sp
+                )
+                Spacer(Modifier.height(3.dp))
+                LinearProgressIndicator(
+                    progress = { state.xpProgressFraction },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(3.dp)),
+                    color = QuestGold,
+                    trackColor = Color.White.copy(alpha = 0.2f),
+                    strokeCap = StrokeCap.Round
+                )
+            }
+            // Level circle
             Box(
                 modifier = Modifier
                     .size(40.dp)
@@ -136,59 +192,6 @@ fun ProfileHeaderBar(
                     )
                 }
             }
-            // Class emoji badge
-            Box(
-                modifier = Modifier
-                    .size(16.dp)
-                    .clip(CircleShape)
-                    .background(QuestPurpleDark),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(state.classEmoji, fontSize = 9.sp)
-            }
-        }
-
-        // Name + title
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = state.heroName,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = state.selectedTitle.displayName,
-                style = MaterialTheme.typography.labelSmall,
-                color = titleColor,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-
-        // XP progress
-        Column(
-            horizontalAlignment = Alignment.End,
-            modifier = Modifier.width(100.dp)
-        ) {
-            Text(
-                text = "${state.xpInLevel} / ${state.xpForNextLevel} XP",
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.White.copy(alpha = 0.75f),
-                fontSize = 9.sp
-            )
-            Spacer(Modifier.height(3.dp))
-            LinearProgressIndicator(
-                progress = { state.xpProgressFraction },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp)
-                    .clip(RoundedCornerShape(3.dp)),
-                color = QuestGold,
-                trackColor = Color.White.copy(alpha = 0.2f),
-                strokeCap = StrokeCap.Round
-            )
         }
     }
     } // end outer Box

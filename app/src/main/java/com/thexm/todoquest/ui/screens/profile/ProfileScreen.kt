@@ -16,14 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.thexm.todoquest.data.model.XPTier
-import com.thexm.todoquest.ui.components.LevelBadge
-import com.thexm.todoquest.ui.components.ProfileBackgroundCanvas
-import com.thexm.todoquest.ui.components.XPProgressBar
 import com.thexm.todoquest.ui.theme.*
 import com.thexm.todoquest.util.LevelCalculator
 
@@ -97,106 +92,9 @@ fun ProfileScreen(viewModel: ProfileViewModel = viewModel()) {
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        // Hero banner — selected background pattern with content overlaid
-        Box(modifier = Modifier.fillMaxWidth()) {
-            ProfileBackgroundCanvas(
-                background = uiState.selectedBackground,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(220.dp)
-            )
-            // Readability scrim
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(220.dp)
-                    .background(Color.Black.copy(alpha = 0.30f))
-            )
-            // Content
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp)
-            ) {
-                LevelBadge(level = profile.level, classEmoji = uiState.selectedClass.emoji, size = 72.dp)
-                Spacer(Modifier.height(12.dp))
-
-                if (uiState.isEditingName) {
-                    OutlinedTextField(
-                        value = uiState.editName,
-                        onValueChange = viewModel::setEditName,
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.White,
-                            unfocusedBorderColor = Color.White.copy(alpha = 0.6f),
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White,
-                            cursorColor = Color.White
-                        ),
-                        textStyle = MaterialTheme.typography.headlineSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        ),
-                        trailingIcon = {
-                            Row {
-                                IconButton(onClick = viewModel::saveHeroName) {
-                                    Icon(Icons.Default.Check, contentDescription = "Save", tint = Color.White)
-                                }
-                                IconButton(onClick = viewModel::cancelEditName) {
-                                    Icon(Icons.Default.Close, contentDescription = "Cancel", tint = Color.White)
-                                }
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(0.8f)
-                    )
-                } else {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = profile.heroName,
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = Color.White
-                        )
-                        IconButton(onClick = viewModel::startEditName, modifier = Modifier.size(32.dp)) {
-                            Icon(
-                                Icons.Default.Edit,
-                                contentDescription = "Edit name",
-                                tint = Color.White.copy(alpha = 0.7f),
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
-                }
-
-                val titleColor = when (uiState.selectedTitle.xpTier) {
-                    null          -> Color.White.copy(alpha = 0.85f)
-                    XPTier.PALTRY -> TierPaltry
-                    XPTier.SMALL  -> TierSmall
-                    XPTier.MEDIUM -> Color(0xFF93C5FD)
-                    XPTier.LARGE  -> QuestPurpleLight
-                    XPTier.EPIC   -> QuestGoldLight
-                }
-                Text(
-                    text = uiState.selectedTitle.displayName,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = titleColor,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.clickable { viewModel.openTitlesDialog() }
-                )
-
-                Spacer(Modifier.height(16.dp))
-
-                XPProgressBar(
-                    totalXP = profile.totalXP,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        }
-
-        // Stats grid
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
 
+            // Hero Stats
             Text(
                 "Hero Stats",
                 style = MaterialTheme.typography.titleLarge,
@@ -206,27 +104,12 @@ fun ProfileScreen(viewModel: ProfileViewModel = viewModel()) {
             )
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                StatCard(
-                    emoji = "⭐",
-                    label = "Total XP",
-                    value = "${profile.totalXP}",
-                    modifier = Modifier.weight(1f)
-                )
-                StatCard(
-                    emoji = "🏆",
-                    label = "Quests Done",
-                    value = "${profile.totalQuestsCompleted}",
-                    modifier = Modifier.weight(1f)
-                )
+                StatCard(emoji = "⭐", label = "Total XP", value = "${profile.totalXP}", modifier = Modifier.weight(1f))
+                StatCard(emoji = "🏆", label = "Quests Done", value = "${profile.totalQuestsCompleted}", modifier = Modifier.weight(1f))
             }
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                StatCard(
-                    emoji = "⚔️",
-                    label = "Current Level",
-                    value = "Level ${profile.level}",
-                    modifier = Modifier.weight(1f)
-                )
+                StatCard(emoji = "⚔️", label = "Current Level", value = "Level ${profile.level}", modifier = Modifier.weight(1f))
                 StatCard(
                     emoji = "💎",
                     label = "XP to Next",
@@ -238,8 +121,6 @@ fun ProfileScreen(viewModel: ProfileViewModel = viewModel()) {
             Spacer(Modifier.height(8.dp))
             Divider()
             Spacer(Modifier.height(8.dp))
-
-            // Titles section
             Text(
                 "Customisation",
                 style = MaterialTheme.typography.titleLarge,
@@ -319,41 +200,6 @@ fun ProfileScreen(viewModel: ProfileViewModel = viewModel()) {
 }
 
 @Composable
-private fun StatCard(
-    emoji: String,
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(emoji, fontSize = 28.sp)
-            Spacer(Modifier.height(4.dp))
-            Text(
-                value,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.ExtraBold,
-                color = QuestPurple
-            )
-            Text(
-                label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
-
-@Composable
 private fun ActionRow(
     emoji: String,
     title: String,
@@ -397,6 +243,27 @@ private fun ActionRow(
             contentDescription = null,
             tint = accentColor.copy(alpha = 0.6f)
         )
+    }
+}
+
+@Composable
+private fun StatCard(
+    emoji: String,
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(emoji, fontSize = 22.sp)
+        Spacer(Modifier.height(4.dp))
+        Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
