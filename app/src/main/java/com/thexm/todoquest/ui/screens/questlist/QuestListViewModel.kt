@@ -93,7 +93,9 @@ class QuestListViewModel(
 
             if (quest.recurrenceType != RecurrenceType.NONE) {
                 // Calculate proper next occurrence date
-                val baseMillis = quest.dueDateMillis ?: System.currentTimeMillis()
+                // If the quest is overdue, base the next occurrence off today rather than the old due date
+                val now = System.currentTimeMillis()
+                val baseMillis = if (quest.dueDateMillis != null && quest.dueDateMillis >= now) quest.dueDateMillis else now
                 nextDueMillis = RecurrenceCalculator.nextDueDate(baseMillis, quest.recurrenceType)
 
                 val nextQuest = quest.copy(
