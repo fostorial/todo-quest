@@ -19,6 +19,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.thexm.todoquest.data.model.QuestBoardBackgroundRegistry
+import com.thexm.todoquest.ui.components.ProfileBackgroundCanvas
 import com.thexm.todoquest.ui.components.QuestCard
 import com.thexm.todoquest.ui.components.parseHexColor
 import com.thexm.todoquest.ui.screens.questlist.CompletionEvent
@@ -259,35 +261,60 @@ private fun QuestWithListCard(
     onEdit: () -> Unit
 ) {
     val listColor = parseHexColor(questWithList.listColorHex)
+    val boardBackground = questWithList.boardBackgroundId?.let {
+        QuestBoardBackgroundRegistry.getById(it)
+    }
 
-    Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)) {
-        // Board label
-        Row(
-            modifier = Modifier.padding(start = 4.dp, bottom = 2.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+    Box(
+        modifier = Modifier
+            .padding(horizontal = 12.dp, vertical = 4.dp)
+            .clip(RoundedCornerShape(16.dp))
+    ) {
+        // Board background layer
+        if (boardBackground != null) {
+            ProfileBackgroundCanvas(
+                background = boardBackground,
+                modifier = Modifier.matchParentSize()
+            )
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(listColor.copy(alpha = 0.15f))
-                    .padding(horizontal = 7.dp, vertical = 2.dp)
-            ) {
-                Text(
-                    text = "${questWithList.listEmoji} ${questWithList.listName}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = listColor,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
+                    .matchParentSize()
+                    .background(Color.Black.copy(alpha = 0.40f))
+            )
         }
 
-        QuestCard(
-            quest = questWithList.quest,
-            onComplete = { onComplete() },
-            onPin = { onPin() },
-            onDelete = { onDelete() },
-            onEdit = { onEdit() }
-        )
+        Column(modifier = Modifier.padding(horizontal = 0.dp, vertical = 4.dp)) {
+            // Board label
+            Row(
+                modifier = Modifier.padding(start = 4.dp, bottom = 2.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(
+                            if (boardBackground != null) Color.White.copy(alpha = 0.15f)
+                            else listColor.copy(alpha = 0.15f)
+                        )
+                        .padding(horizontal = 7.dp, vertical = 2.dp)
+                ) {
+                    Text(
+                        text = "${questWithList.listEmoji} ${questWithList.listName}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (boardBackground != null) Color.White else listColor,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+
+            QuestCard(
+                quest = questWithList.quest,
+                onComplete = { onComplete() },
+                onPin = { onPin() },
+                onDelete = { onDelete() },
+                onEdit = { onEdit() }
+            )
+        }
     }
 }
 

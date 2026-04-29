@@ -12,5 +12,7 @@ data class QuestList(
     val createdAtMillis: Long = System.currentTimeMillis(),
     val sortOrder: Int = 0,
     // Stable ID assigned on first export; used to match the same board across devices on re-import
-    val shareId: String? = null
+    val shareId: String? = null,
+    // Quest board background; null = no background (default behaviour)
+    val boardBackgroundId: String? = null
 )

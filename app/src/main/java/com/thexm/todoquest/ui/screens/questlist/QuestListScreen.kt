@@ -22,6 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.thexm.todoquest.data.model.Quest
+import com.thexm.todoquest.data.model.QuestBoardBackgroundRegistry
+import com.thexm.todoquest.ui.components.ProfileBackgroundCanvas
 import com.thexm.todoquest.ui.components.QuestCard
 import com.thexm.todoquest.ui.components.parseHexColor
 import com.thexm.todoquest.ui.theme.QuestGold
@@ -76,6 +78,10 @@ fun QuestListScreen(
             snackbarHostState.showSnackbar(message = message, duration = SnackbarDuration.Short)
             viewModel.dismissCompletion()
         }
+    }
+
+    val boardBackground = uiState.questList?.boardBackgroundId?.let {
+        QuestBoardBackgroundRegistry.getById(it)
     }
 
     Scaffold(
@@ -155,59 +161,79 @@ fun QuestListScreen(
             return@Scaffold
         }
 
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(bottom = 100.dp)
+                .padding(padding)
         ) {
-            // Active quests
-            if (uiState.activeQuests.isEmpty()) {
-                item { EmptyQuestsMessage() }
-            } else {
-                items(uiState.activeQuests, key = { it.id }) { quest ->
-                    QuestCard(
-                        quest = quest,
-                        onComplete = viewModel::completeQuest,
-                        onPin = viewModel::togglePin,
-                        onDelete = viewModel::promptDeleteQuest,
-                        onEdit = onEditQuest,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
-                    )
-                }
+            // Board background layer
+            if (boardBackground != null) {
+                ProfileBackgroundCanvas(
+                    background = boardBackground,
+                    modifier = Modifier.fillMaxSize()
+                )
+                // Dim overlay for readability
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.35f))
+                )
             }
 
-            // Completed section toggle
-            if (uiState.completedQuests.isNotEmpty()) {
-                item {
-                    TextButton(
-                        onClick = viewModel::toggleShowCompleted,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-                    ) {
-                        Icon(
-                            if (uiState.showCompleted) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text(
-                            text = "${uiState.completedQuests.size} Completed Quest${if (uiState.completedQuests.size != 1) "s" else ""}",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.labelLarge
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 100.dp)
+            ) {
+                // Active quests
+                if (uiState.activeQuests.isEmpty()) {
+                    item { EmptyQuestsMessage(hasBackground = boardBackground != null) }
+                } else {
+                    items(uiState.activeQuests, key = { it.id }) { quest ->
+                        QuestCard(
+                            quest = quest,
+                            onComplete = viewModel::completeQuest,
+                            onPin = viewModel::togglePin,
+                            onDelete = viewModel::promptDeleteQuest,
+                            onEdit = onEditQuest,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
                         )
                     }
                 }
 
-                if (uiState.showCompleted) {
-                    items(uiState.completedQuests, key = { "c_${it.id}" }) { quest ->
-                        QuestCard(
-                            quest = quest,
-                            onComplete = {},
-                            onPin = {},
-                            onDelete = viewModel::promptDeleteQuest,
-                            onEdit = {},
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
-                        )
+                // Completed section toggle
+                if (uiState.completedQuests.isNotEmpty()) {
+                    item {
+                        TextButton(
+                            onClick = viewModel::toggleShowCompleted,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                        ) {
+                            Icon(
+                                if (uiState.showCompleted) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                contentDescription = null,
+                                tint = if (boardBackground != null) Color.White.copy(alpha = 0.8f)
+                                       else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                text = "${uiState.completedQuests.size} Completed Quest${if (uiState.completedQuests.size != 1) "s" else ""}",
+                                color = if (boardBackground != null) Color.White.copy(alpha = 0.8f)
+                                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        }
+                    }
+
+                    if (uiState.showCompleted) {
+                        items(uiState.completedQuests, key = { "c_${it.id}" }) { quest ->
+                            QuestCard(
+                                quest = quest,
+                                onComplete = {},
+                                onPin = {},
+                                onDelete = viewModel::promptDeleteQuest,
+                                onEdit = {},
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -252,7 +278,7 @@ private fun DeleteQuestDialog(
 }
 
 @Composable
-private fun EmptyQuestsMessage() {
+private fun EmptyQuestsMessage(hasBackground: Boolean = false) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -265,13 +291,14 @@ private fun EmptyQuestsMessage() {
             text = "No Quests Yet!",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            color = QuestPurple
+            color = if (hasBackground) Color.White else QuestPurple
         )
         Spacer(Modifier.height(6.dp))
         Text(
             text = "Tap the + button to add your first quest",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = if (hasBackground) Color.White.copy(alpha = 0.75f)
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
     }

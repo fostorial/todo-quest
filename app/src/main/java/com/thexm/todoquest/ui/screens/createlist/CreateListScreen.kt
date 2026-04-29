@@ -20,10 +20,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.thexm.todoquest.data.model.QuestBoardBackgroundRegistry
+import com.thexm.todoquest.ui.components.ProfileBackgroundCanvas
 import com.thexm.todoquest.ui.components.parseHexColor
 import com.thexm.todoquest.ui.theme.QuestPurple
 
@@ -35,7 +38,24 @@ fun CreateListScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val unlockedClassEmojis by viewModel.unlockedClassEmojis.collectAsState()
+    val profile by viewModel.profile.collectAsState()
+    val xpPerClass by viewModel.xpPerClass.collectAsState()
     val availableEmojis = remember(unlockedClassEmojis) { PRESET_EMOJIS + unlockedClassEmojis }
+
+    var showBackgroundDialog by remember { mutableStateOf(false) }
+
+    if (showBackgroundDialog && profile != null) {
+        QuestBoardBackgroundsDialog(
+            profile = profile!!,
+            xpPerClass = xpPerClass,
+            selectedBackgroundId = state.boardBackgroundId,
+            onSelect = { id ->
+                viewModel.setBackground(id)
+                showBackgroundDialog = false
+            },
+            onDismiss = { showBackgroundDialog = false }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -186,6 +206,63 @@ fun CreateListScreen(
                         }
                     }
                 }
+            }
+
+            // Background picker
+            Text("Choose a Background", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(14.dp))
+                    .clickable { showBackgroundDialog = true }
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                val selectedBg = state.boardBackgroundId?.let { QuestBoardBackgroundRegistry.getById(it) }
+
+                // Thumbnail
+                Box(
+                    modifier = Modifier
+                        .width(64.dp)
+                        .height(44.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                ) {
+                    if (selectedBg != null) {
+                        ProfileBackgroundCanvas(background = selectedBg, modifier = Modifier.fillMaxSize())
+                    } else {
+                        Surface(
+                            modifier = Modifier.fillMaxSize(),
+                            color = MaterialTheme.colorScheme.surfaceVariant
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text("✕", fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    }
+                }
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = selectedBg?.displayName ?: "None",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = selectedBg?.flavorText ?: "Tap to choose a background",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontStyle = FontStyle.Italic
+                    )
+                }
+
+                Text(
+                    text = "Change",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = QuestPurple,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
 
             Spacer(Modifier.height(8.dp))

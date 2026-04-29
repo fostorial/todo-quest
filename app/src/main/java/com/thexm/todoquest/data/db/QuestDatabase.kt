@@ -14,7 +14,7 @@ import com.thexm.todoquest.data.model.QuestList
 
 @Database(
     entities = [Quest::class, QuestList::class, PlayerProfile::class, HeroClassProgress::class],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -65,6 +65,12 @@ abstract class QuestDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE quest_lists ADD COLUMN boardBackgroundId TEXT")
+            }
+        }
+
         fun getInstance(context: Context): QuestDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -72,7 +78,7 @@ abstract class QuestDatabase : RoomDatabase() {
                     QuestDatabase::class.java,
                     "quest_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                     .build().also { INSTANCE = it }
             }
     }

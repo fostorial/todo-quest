@@ -20,7 +20,8 @@ data class QuestWithList(
     val quest: Quest,
     val listName: String,
     val listEmoji: String,
-    val listColorHex: String
+    val listColorHex: String,
+    val boardBackgroundId: String? = null
 )
 
 data class ActiveUiState(
@@ -164,7 +165,8 @@ class ActiveViewModel(application: Application) : AndroidViewModel(application) 
             quest = this,
             listName = list?.name ?: "Unknown Board",
             listEmoji = list?.emoji ?: "📜",
-            listColorHex = list?.colorHex ?: "#8B5CF6"
+            listColorHex = list?.colorHex ?: "#8B5CF6",
+            boardBackgroundId = list?.boardBackgroundId
         )
     }
 }
