@@ -12,6 +12,7 @@ import com.thexm.todoquest.notification.QuestNotificationManager
 import com.thexm.todoquest.notification.QuestReminderScheduler
 import com.thexm.todoquest.ui.screens.questlist.CompletionEvent
 import com.thexm.todoquest.util.RecurrenceCalculator
+import java.util.Calendar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -96,9 +97,19 @@ class ActiveViewModel(application: Application) : AndroidViewModel(application) 
             var nextDueMillis: Long? = null
 
             if (quest.recurrenceType != RecurrenceType.NONE) {
-                // If the quest is overdue, base the next occurrence off today rather than the old due date
+                // If the quest is overdue, use today's date but keep the original scheduled time-of-day
                 val now = System.currentTimeMillis()
-                val baseMillis = if (quest.dueDateMillis != null && quest.dueDateMillis >= now) quest.dueDateMillis else now
+                val baseMillis = if (quest.dueDateMillis != null && quest.dueDateMillis >= now) {
+                    quest.dueDateMillis
+                } else if (quest.dueDateMillis != null) {
+                    val scheduled = Calendar.getInstance().apply { timeInMillis = quest.dueDateMillis }
+                    Calendar.getInstance().apply {
+                        set(Calendar.HOUR_OF_DAY, scheduled.get(Calendar.HOUR_OF_DAY))
+                        set(Calendar.MINUTE, scheduled.get(Calendar.MINUTE))
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }.timeInMillis
+                } else now
                 nextDueMillis = RecurrenceCalculator.nextDueDate(baseMillis, quest.recurrenceType)
 
                 val nextQuest = quest.copy(
