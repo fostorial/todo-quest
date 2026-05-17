@@ -1,0 +1,42 @@
+package co.uk.fostorial.quest.notification
+
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import co.uk.fostorial.quest.QuestApplication
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
+class NotificationReceiver : BroadcastReceiver() {
+
+    override fun onReceive(context: Context, intent: Intent) {
+        when (intent.action) {
+            "co.uk.fostorial.quest.ACTION_COMPLETE_QUEST" -> {
+                val questId = intent.getLongExtra("quest_id", -1L)
+                if (questId != -1L) {
+                    val pending = goAsync()
+                    val app = context.applicationContext as QuestApplication
+                    CoroutineScope(Dispatchers.IO).launch {
+                        try {
+                            val quest = app.questRepository.getQuestById(questId)
+                            if (quest != null && !quest.isCompleted) {
+                                app.questRepository.completeQuest(questId)
+                                app.playerRepository.awardXP(quest.xpTier.xpValue)
+                                app.playerRepository.recordQuestCompletion(quest.xpTier)
+                                QuestNotificationManager.cancelQuestReminder(context, questId)
+                                QuestNotificationManager.cancelQuestDueNow(context, questId)
+                                NotificationUpdateWorker.scheduleImmediate(context)
+                            }
+                        } finally {
+                            pending.finish()
+                        }
+                    }
+                }
+            }
+            "co.uk.fostorial.quest.ACTION_DISMISS_NOTIFICATION" -> {
+                QuestNotificationManager.cancelQuestBoard(context)
+            }
+        }
+    }
+}

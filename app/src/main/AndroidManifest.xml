@@ -39,14 +39,24 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="*/*" android:pathPattern=".*\\.questboard" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/x-heroexport" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" android:pathPattern=".*\\.heroexport" />
+            </intent-filter>
         </activity>
 
         <receiver
             android:name=".notification.NotificationReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.thexm.todoquest.ACTION_COMPLETE_QUEST" />
-                <action android:name="com.thexm.todoquest.ACTION_DISMISS_NOTIFICATION" />
+                <action android:name="co.uk.fostorial.quest.ACTION_COMPLETE_QUEST" />
+                <action android:name="co.uk.fostorial.quest.ACTION_DISMISS_NOTIFICATION" />
             </intent-filter>
         </receiver>
 
