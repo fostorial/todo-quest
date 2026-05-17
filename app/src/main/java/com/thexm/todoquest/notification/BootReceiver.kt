@@ -11,9 +11,11 @@ import kotlinx.coroutines.launch
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
-            val app = context.applicationContext as QuestApplication
-            CoroutineScope(Dispatchers.IO).launch {
+        if (intent.action != Intent.ACTION_BOOT_COMPLETED) return
+        val pending = goAsync()
+        val app = context.applicationContext as QuestApplication
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
                 val profile = app.playerRepository.getOrCreateProfile()
                 if (profile.notificationEnabled) {
                     val count = app.questRepository.getActiveQuestCount().first()
@@ -22,6 +24,8 @@ class BootReceiver : BroadcastReceiver() {
                         context, count, pinned, profile.notificationPersistent
                     )
                 }
+            } finally {
+                pending.finish()
             }
         }
     }

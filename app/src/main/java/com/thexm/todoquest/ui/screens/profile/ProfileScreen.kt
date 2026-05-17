@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -14,8 +16,11 @@ import androidx.compose.ui.Alignment
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -34,6 +39,39 @@ fun ProfileScreen(viewModel: ProfileViewModel = viewModel()) {
         viewModel.snackbarEvents.collect { message ->
             scope.launch { snackbarHostState.showSnackbar(message) }
         }
+    }
+
+    if (uiState.isEditingName) {
+        val focusRequester = remember { FocusRequester() }
+        AlertDialog(
+            onDismissRequest = viewModel::cancelEditName,
+            title = { Text("Hero Name", fontWeight = FontWeight.Bold) },
+            text = {
+                OutlinedTextField(
+                    value = uiState.editName,
+                    onValueChange = viewModel::setEditName,
+                    singleLine = true,
+                    placeholder = { Text("Enter hero name") },
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { viewModel.saveHeroName() }),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester)
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = viewModel::saveHeroName) {
+                    Text("Save", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::cancelEditName) {
+                    Text("Cancel")
+                }
+            },
+            shape = RoundedCornerShape(20.dp)
+        )
+        LaunchedEffect(Unit) { focusRequester.requestFocus() }
     }
 
     if (uiState.showClassDialog) {
@@ -128,6 +166,40 @@ fun ProfileScreen(viewModel: ProfileViewModel = viewModel()) {
                 color = QuestPurple,
                 modifier = Modifier.padding(bottom = 4.dp)
             )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                    Text("🧙", fontSize = 22.sp)
+                    Spacer(Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            "Hero Name",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = QuestPurple
+                        )
+                        Text(
+                            profile.heroName,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                Button(
+                    onClick = viewModel::startEditName,
+                    colors = ButtonDefaults.buttonColors(containerColor = QuestPurple)
+                ) {
+                    Text("Edit")
+                }
+            }
 
             ActionRow(
                 emoji = uiState.selectedClass.emoji,
